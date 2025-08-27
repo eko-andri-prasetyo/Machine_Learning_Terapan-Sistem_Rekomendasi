@@ -61,6 +61,20 @@ Dataset yang digunakan dalam proyek ini adalah MovieLens Latest Small Dataset ya
 ### Eksplorasi Data
 Analisis menunjukkan bahwa genre Drama (4,361) dan Comedy (3,756) merupakan genre yang paling dominan dalam dataset. Distribusi tahun rilis menunjukkan sebagian besar film dirilis setelah tahun 1990, dengan puncaknya sekitar tahun 2000-2010. Rating 3.0 dan 4.0 paling umum diberikan oleh pengguna.
 
+![Distribusi Tahun Rilis Film](https://i.imgur.com/OPCkP2n.png)
+*Sebagian besar film dalam dataset dirilis setelah tahun 1990, dengan puncaknya sekitar tahun 2000-2010*
+
+![Distribusi Genre Film](https://i.imgur.com/C33HKti.png)
+*Drama (4,361) dan Comedy (3,756) merupakan genre yang paling dominan dalam dataset*
+
+![Word Cloud Genre](https://i.imgur.com/UbOeNxQ.png)
+*Visualisasi word cloud menunjukkan variasi genre dalam dataset*
+
+![Distribusi Rating](https://i.imgur.com/mLpvVfH.png)
+*Rating 3.0 dan 4.0 paling umum diberikan oleh pengguna*
+
+**Insight**: Terdapat korelasi positif antara jumlah rating dan rata-rata rating, menunjukkan bahwa film populer cenderung mendapat rating lebih tinggi.
+
 ## Data Preparation
 
 Tahapan preprocessing data yang dilakukan:
