@@ -128,6 +128,12 @@ Content-Based Filtering merekomendasikan item berdasarkan kesamaan atribut denga
 - `stop_words='english'`: Mengabaikan kata umum dalam bahasa Inggris
 - Default parameters untuk TF-IDF dan cosine similarity
 
+**Kelebihan dan Kekurangan**:
+- ✅ Tidak memerlukan data dari pengguna lain
+- ✅ Dapat merekomendasikan item baru
+- ❌ Terbatas pada fitur yang tersedia
+- ❌ Kurang mampu menemukan hubungan yang tidak terduga
+
 **Hasil Rekomendasi untuk "Toy Story (1995)":**
 1. Toy Story 2 (1999)
 2. Adventures of Rocky and Bullwinkle, The (2000) 
@@ -147,6 +153,12 @@ Collaborative Filtering memprediksi preferensi pengguna berdasarkan rating dari 
 - `optimizer='adam'`: Optimizer Adam dengan learning rate default
 - `loss='mean_squared_error'`: Loss function untuk regression task
 
+**Kelebihan dan Kekurangan**:
+- ✅ Dapat menemukan hubungan yang tidak terduga
+- ✅ Personalisasi yang lebih baik
+- ❌ Cold start problem untuk user/item baru
+- ❌ Memerlukan data yang cukup dari banyak pengguna
+
 **Arsitektur Model**:
 ```
 Input Layers → Embedding Layers → Flatten → Dot Product → Output
@@ -159,18 +171,6 @@ Input Layers → Embedding Layers → Flatten → Dot Product → Output
 4. Grand Day Out with Wallace and Gromit, A (1989)
 5. Harold and Maude (1971)
 
-### Kelebihan dan Kekurangan
-**Content-Based Filtering**:
-- ✅ Tidak memerlukan data dari pengguna lain
-- ✅ Dapat merekomendasikan item baru
-- ❌ Terbatas pada fitur yang tersedia
-- ❌ Kurang mampu menemukan hubungan yang tidak terduga
-
-**Collaborative Filtering**:
-- ✅ Dapat menemukan hubungan yang tidak terduga
-- ✅ Personalisasi yang lebih baik
-- ❌ Cold start problem untuk user/item baru
-- ❌ Memerlukan data yang cukup dari banyak pengguna
 
 ## Evaluation
 
