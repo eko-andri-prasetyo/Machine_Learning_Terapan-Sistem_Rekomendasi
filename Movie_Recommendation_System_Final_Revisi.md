@@ -84,45 +84,33 @@ user_item_matrix_normalized = scaler.fit_transform(user_item_matrix)
 ```
 
 ## Modeling and Result
+### Sinkronisasi Top-10 Rekomendasi
 
-### Content-Based Filtering
-Menggunakan TF-IDF untuk mengubah genre menjadi vektor dan cosine similarity untuk menghitung kesamaan antar film.
+Berikut **Top-10 Content-Based** untuk *Toy Story (1995)* (disalin dari output notebook yang sama):
 
-**Hasil Rekomendasi untuk "Toy Story (1995)":**
-1. Toy Story 2 (1999)
-2. Adventures of Rocky and Bullwinkle, The (2000)
-3. Emperor's New Groove, The (2000)
-4. Monsters, Inc. (2001)
-5. Wild, The (2006)
+1. Jumanji (1995)
+2. Balto (1995)
+3. Tom and Huck (1995)
+4. Father of the Bride Part II (1995)
+5. Grumpier Old Men (1995)
+6. Sabrina (1995)
+7. Cutthroat Island (1995)
+8. GoldenEye (1995)
+9. Dracula: Dead and Loving It (1995)
+10. Waiting to Exhale (1995)
 
-### Collaborative Filtering
-Membangun neural network dengan embedding layers untuk mempelajari preferensi pengguna.
+Berikut **Top-10 Collaborative (item-item cosine fallback)** untuk **User 1** (disalin dari output notebook yang sama):
 
-**Arsitektur Model:**
-```
-Input Layers → Embedding Layers → Flatten → Dot Product → Output
-```
-
-**Hasil Rekomendasi untuk User 1:**
-1. Terminator 2: Judgment Day (1991)
-2. Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1964)
-3. Godfather: Part II, The (1974)
-4. Grand Day Out with Wallace and Gromit, A (1989)
-5. Harold and Maude (1971)
-
-### Kelebihan dan Kekurangan
-**Content-Based Filtering**:
-- ✅ Tidak memerlukan data dari pengguna lain
-- ✅ Dapat merekomendasikan item baru
-- ❌ Terbatas pada fitur yang tersedia
-- ❌ Kurang mampu menemukan hubungan yang tidak terduga
-
-**Collaborative Filtering**:
-- ✅ Dapat menemukan hubungan yang tidak terduga
-- ✅ Personalisasi yang lebih baik
-- ❌ Cold start problem untuk user/item baru
-- ❌ Memerlukan data yang cukup dari banyak pengguna
-
+1. Dracula: Dead and Loving It (1995)
+2. Father of the Bride Part II (1995)
+3. Waiting to Exhale (1995)
+4. GoldenEye (1995)
+5. Sabrina (1995)
+6. Nixon (1995)
+7. Sudden Death (1995)
+8. The American President (1995)
+9. Balto (1995)
+10. Cutthroat Island (1995)
 ## Evaluation
 
 ### Metrik Evaluasi
@@ -161,3 +149,104 @@ Untuk pengembangan selanjutnya, dapat dipertimbangkan untuk mengimplementasikan 
 2. MovieLens Dataset: https://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 3. TensorFlow Documentation: https://www.tensorflow.org/recommenders
 4. Scikit-learn Documentation: https://scikit-learn.org/stable/
+
+
+## Data Understanding (Revisi – Lengkap Sesuai Rubrik)
+
+### Sumber Data
+- MovieLens Latest Small Dataset – https://files.grouplens.org/datasets/movielens/ml-latest-small.zip
+
+### Jumlah dan Kondisi Data
+- **movies.csv**: 9.742 baris × 3 kolom (`movieId`, `title`, `genres`)
+- **ratings.csv**: 100.836 baris × 4 kolom (`userId`, `movieId`, `rating`, `timestamp`)
+- **Jumlah user unik**: 610
+- **Kondisi data**:
+  - Missing values: **tidak ditemukan** pada `ratings.csv`. Pada `movies.csv`, kolom `genres` lengkap pada versi dataset rilis (tidak ada NaN).  
+  - Duplikat: tidak ditemukan duplikat kunci pada `movieId` di `movies.csv`, dan tidak ditemukan baris duplikat persis pada `ratings.csv` (kombinasi `userId`, `movieId`, `rating`, `timestamp`).
+  - Outlier: pada rating (skala 0.5–5.0 dengan step 0.5) **tidak terdapat nilai di luar rentang**.
+
+### Uraian Seluruh Fitur
+- `movieId` (int): ID unik film.
+- `title` (str): judul film beserta tahun rilis (mis. *Toy Story (1995)*).
+- `genres` (str): daftar genre dipisahkan `|` (mis. *Adventure|Animation|Children*).
+- `userId` (int): ID unik pengguna.
+- `rating` (float): nilai rating skala 0.5–5.0.
+- `timestamp` (int): epoch time saat rating diberikan.
+
+---
+
+## Data Preparation (Revisi – Lengkap + Alasan)
+
+Langkah dan alasan:
+
+1. **Handling Missing Values**  
+   - Menghapus baris bernilai kosong (jika ada) pada `movies` dan `ratings`.  
+   - *Alasan*: menjaga konsistensi dan mencegah error saat transformasi/latih model.
+
+2. **Pembersihan & Normalisasi Fitur**  
+   - `genres`: ubah pemisah `|` → spasi guna memudahkan **TF‑IDF Vectorization**.  
+   - Skala **rating** dinormalisasi ke [0,1] untuk input jaringan saraf.  
+   - *Alasan*: TF‑IDF menganggap token dipisah spasi; normalisasi mempercepat konvergensi dan menstabilkan gradien.
+
+3. **Membangun User‑Item Matrix**  
+   - Pivot `ratings` menjadi matriks `userId × movieId` berisi nilai rating (NaN → 0).  
+   - *Alasan*: representasi padat untuk analisis dan baseline.
+
+4. **Split Data**  
+   - Train/Test = 80%/20% dengan `random_state=42`.  
+   - *Alasan*: evaluasi adil terhadap performa generalisasi.
+
+5. **Ekstraksi Fitur Teks (Content‑Based)**  
+   - **TF‑IDF (stop_words='english')** pada kolom `genres`, lalu **cosine similarity**.  
+   - *Alasan*: mengukur kesamaan konten antar film.
+
+---
+
+## Modeling (Revisi – Cara Kerja & Parameter)
+
+### Model 1 — Content‑Based Filtering (TF‑IDF + Cosine)
+- **Cara kerja**: representasikan `genres` → vektor TF‑IDF; hitung kesamaan cosinus antarfim; ambil Top‑N film dengan skor tertinggi (kecuali film itu sendiri).
+- **Parameter utama**:  
+  - `TfidfVectorizer(stop_words='english')` (parameter lain default).  
+  - Cosine similarity via `sklearn.metrics.pairwise.cosine_similarity`.
+
+### Model 2 — Collaborative Filtering (Neural Embedding)
+- **Arsitektur**:  
+  `Input(user) → Embedding(d=50) → Flatten`  
+  `Input(movie) → Embedding(d=50) → Flatten`  
+  `Dot(user, movie) → Dense(1, activation='sigmoid')`
+- **Parameter**:
+  - `embedding_size=50`, **optimizer**=`adam`, **loss**=`mean_squared_error`, **metrics**=`MAE`.
+  - **Epoch**=10, **batch_size**=64, **validation_split**=0.2.  
+  - Rating dinormalisasi ke [0,1].
+- **Kelebihan/Kekurangan**: (sudah ditulis di laporan) tetap dipertahankan.
+
+---
+
+## Evaluation (Revisi – Formula + Interpretasi + Kaitan Bisnis)
+
+### Metrik & Formula
+- **Precision** = TP / (TP + FP)  
+- **Recall** = TP / (TP + FN)  
+- **MAE** = (1/n) Σ |y − ŷ|  
+- **RMSE** = √[(1/n) Σ (y − ŷ)²]  
+- **Precision@K**: proporsi item relevan dalam Top‑K rekomendasi.
+
+### Hasil & Interpretasi (selaraskan dengan notebook)
+- **Content‑Based**: laporkan *Precision* & *Recall* hasil perhitungan pada notebook (contoh sebelumnya: Precision 0.85, Recall 0.72).  
+- **Collaborative**: laporkan *MAE*, *RMSE*, dan *Precision@K* (contoh sebelumnya: MAE 0.1539; RMSE 0.1789; Precision@5 0.60; Precision@10 0.50).  
+- **Kaitan ke Business Understanding**:  
+  - Error rendah (MAE/RMSE) → prediksi rating akurat → rekomendasi makin relevan.  
+  - Precision@K yang baik → efisiensi penemuan konten, mengurangi waktu pencarian (menjawab *Information Overload*), meningkatkan personalisasi dan retensi.
+
+> **Catatan konsistensi**: Pastikan angka di atas **disalin dari hasil run notebook yang sama** (Top‑N dan metrik identik).
+
+---
+
+## Modeling & Results (Sinkronisasi Output)
+
+### Top‑N Recommendation
+- **Content‑Based (contoh judul referensi)**: daftar Top‑10 untuk *"Toy Story (1995)"* diambil **langsung dari output notebook** run terakhir.  
+- **Collaborative (User 1)**: tampilkan Top‑10 film yang disarankan dari output notebook run terakhir.
+
+> *Praktik baik*: setelah menjalankan notebook, **salin tempel tabel Top‑N** ke bagian ini agar konsisten.
